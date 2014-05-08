@@ -25,7 +25,7 @@ define('DB_USER', 'adminjCt54kv');
 define('DB_PASSWORD', '2gm6Tzg1Ysgl');
 
 /** MySQL hostname */
-define('DB_HOST', 'https://myralora-umairahmymy.rhcloud.com/phpmyadmin/');
+define('DB_HOST', 'https://myralora-umairahmymy.rhcloud.com/');
 
 /** Database Charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8');
