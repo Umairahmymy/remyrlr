@@ -1051,11 +1051,7 @@ function pinboard_validate_theme_options( $input ) {
 			$input['layout_columns'] = pinboard_get_option( 'layout_columns' );
 		$input['hide_sidebar'] = ( isset( $input['hide_sidebar'] ) ? true : false );
 		$input['hide_footer_area'] = ( isset( $input['hide_footer_area'] ) ? true : false );
-		$input['user_css'] = strip_tags( $input['user_css'] );
-		$input['user_css'] = str_replace( 'behavior', '', $input['user_css'] );
-		$input['user_css'] = str_replace( 'expression', '', $input['user_css'] );
-		$input['user_css'] = str_replace( 'binding', '', $input['user_css'] );
-		$input['user_css'] = str_replace( '@import', '', $input['user_css'] );
+		$input['user_css'] = esc_html( $input['user_css'] );
 	} elseif( isset( $input['submit-typography'] ) || isset( $input['reset-typography'] ) ) {
 		$fonts = pinboard_available_fonts();
 		$units = array( 'px', 'pt', 'em', '%' );

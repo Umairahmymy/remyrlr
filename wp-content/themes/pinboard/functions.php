@@ -38,7 +38,7 @@ function pinboard_theme_setup() {
 	add_theme_support( 'post-formats', array( 'aside', 'gallery', 'link', 'image', 'quote', 'status', 'video', 'audio', 'chat' ) );
 	
 	// Add support for post thumbnails and custom image sizes specific to theme locations
-	add_theme_support( 'post-thumbnails' );
+	add_theme_support( 'post-thumbnails', array( 'post' ) );
 	add_image_size( 'slider-thumb', 1140, 395, 1 );
 	add_image_size( 'blog-thumb', 700, ( pinboard_get_option( 'crop_thumbnails' ) ? 300 : 9999 ), ( pinboard_get_option( 'crop_thumbnails' ) ? 1 : 0 ) );
 	add_image_size( 'teaser-thumb', 332, ( pinboard_get_option( 'crop_thumbnails' ) ? 205 : 9999 ), ( pinboard_get_option( 'crop_thumbnails' ) ? 1 : 0 ) );
@@ -54,7 +54,6 @@ function pinboard_theme_setup() {
 		'height' => ( pinboard_get_option( 'retina_header' ) ? 96 : 48 ),
 		'default-text-color' => '333',
 		'flex-width' => true,
-		'flex-height' => true,
 		'wp-head-callback' => 'pinboard_header_style',
 		'admin-head-callback' => 'pinboard_admin_header_style',
 		'admin-preview-callback' => 'pinboard_admin_header_image'
@@ -273,8 +272,6 @@ function pinboard_admin_header_style() {
 	}
 	#headimg img {
 		max-width: 100%;
-		height: auto;
-		margin: 38px 0;
 		vertical-align:middle;
 	}
 	#headimg h1 a,
@@ -360,7 +357,7 @@ function pinboard_default_options() {
 		'wordpress_credit_link' => true,
 		'page_background' => '#f8f8f8',
 		'menu_background' => '#111',
-		'submenu_background' => '#333',
+		'menu_item_hover_background' => '#555',
 		'sidebar_wide_background' => '#eee',
 		'content_background' => '#fff',
 		'post_meta_background' => '#fcfcfc',
@@ -439,13 +436,9 @@ if ( ! function_exists( 'pinboard_get_option' ) ) :
  * @since Pinboard 1.0
  */
 function pinboard_get_option( $option ) {
-	global $pinboard_options, $pinboard_default_options;
-	if( ! isset( $pinboard_default_options ) )
-		$pinboard_default_options = pinboard_default_options();
+	global $pinboard_options;
 	if( ! isset( $pinboard_options ) )
-		$pinboard_options = get_option( 'pinboard_theme_options', $pinboard_default_options );
-	if( ! isset( $pinboard_options[ $option ] ) )
-		return $pinboard_default_options[ $option ];
+		$pinboard_options = get_option( 'pinboard_theme_options', pinboard_default_options() );
 	return $pinboard_options[ $option ];
 }
 endif;
@@ -587,10 +580,11 @@ if ( ! function_exists( 'pinboard_register_scripts' ) ) :
 function pinboard_register_scripts() {
 	wp_register_script( 'ios-orientationchange-fix', get_template_directory_uri() . '/scripts/ios-orientationchange-fix.js', false, null );
 	wp_register_script( 'flexslider', get_template_directory_uri() . '/scripts/jquery.flexslider-min.js', array( 'jquery' ), null );
-	wp_register_script( 'imagesloaded', get_template_directory_uri() . '/scripts/imagesloaded.pkgd.js', array( 'jquery' ), null );
-	wp_register_script( 'masonry', get_template_directory_uri() . '/scripts/jquery.masonry.pkgd.js', array( 'jquery', 'imagesloaded' ), null );
-	wp_register_script( 'colorbox', get_template_directory_uri() . '/scripts/jquery.colorbox.js', array( 'jquery' ), null );
-	wp_register_script( 'fitvids', get_template_directory_uri() . '/scripts/jquery.fitvids.js', array( 'jquery' ), null );
+	wp_register_script( 'masonry', get_template_directory_uri() . '/scripts/jquery.masonry.min.js', array( 'jquery' ), null );
+	wp_register_script( 'colorbox', get_template_directory_uri() . '/scripts/colorbox.js', array( 'jquery' ), null );
+	wp_register_script( 'fitvids', get_template_directory_uri() . '/scripts/fitvids.js', array( 'jquery' ), null );
+	wp_register_script( 'mediaelement', get_template_directory_uri() . '/scripts/mediaelement.js', array( 'jquery' ), null );
+	wp_register_script( 'mediaelementplayer', get_template_directory_uri() . '/scripts/mediaelementplayer.js', array( 'mediaelement' ), null );
 	wp_register_script( 'infinitescroll', get_template_directory_uri() . '/scripts/jquery.infinitescroll.js', array( 'jquery' ), null );
 }
 endif;
@@ -610,7 +604,7 @@ function pinboard_enqueue_scripts() {
 	wp_enqueue_script( 'jquery' );
 	wp_enqueue_script( 'flexslider' );
 	wp_enqueue_script( 'fitvids' );
-	wp_enqueue_script( 'wp-mediaelement' );
+	wp_enqueue_script( 'mediaelementplayer' );
 	if( 'infinite' == pinboard_get_option( 'posts_nav' ) && ! is_singular() && ! is_paged() || ( is_page_template( 'template-blog.php' ) || is_page_template( 'template-blog-full-width.php' ) || is_page_template( 'template-blog-four-col.php' ) || is_page_template( 'template-blog-left-sidebar.php' ) || is_page_template( 'template-blog-no-sidebars.php' ) || is_page_template( 'template-portfolio.php' ) || is_page_template( 'template-portfolio-right-sidebar.php' ) || is_page_template( 'template-portfolio-four-col.php' ) || is_page_template( 'template-portfolio-left-sidebar.php' ) || is_page_template( 'template-portfolio-no-sidebars.php' ) && ! is_paged() ) )
 		wp_enqueue_script( 'infinitescroll' );
 	if( ! is_singular() || is_page_template( 'template-blog.php' ) || is_page_template( 'template-blog-full-width.php' ) || is_page_template( 'template-blog-four-col.php' ) || is_page_template( 'template-blog-left-sidebar.php' ) || is_page_template( 'template-blog-no-sidebars.php' ) || is_page_template( 'template-blog-no-sidebars.php' ) || is_page_template( 'template-portfolio.php' ) || is_page_template( 'template-portfolio-right-sidebar.php' ) || is_page_template( 'template-portfolio-four-col.php' ) || is_page_template( 'template-portfolio-left-sidebar.php' ) || is_page_template( 'template-portfolio-no-sidebars.php' ) )
@@ -694,23 +688,23 @@ function pinboard_call_scripts() { ?>
 		if( ($(window).width() > 960) || ($(document).width() > 960) ) {
 			// Viewport is greater than tablet: portrait
 		} else {
-			$('#content .hentry').each(function() {
+			$('#content .post').each(function() {
 				pinboard_move_elements($(this));
 			});
 		}
 		$(window).resize(function() {
 			if( ($(window).width() > 960) || ($(document).width() > 960) ) {
 				<?php if( is_category( pinboard_get_option( 'portfolio_cat' ) ) || ( is_category() && cat_is_ancestor_of( pinboard_get_option( 'portfolio_cat' ), get_queried_object() ) ) ) : ?>
-					$('#content .hentry').each(function() {
+					$('#content .post').each(function() {
 						pinboard_restore_elements($(this));
 					});
 				<?php else : ?>
-					$('.page-template-template-full-width-php #content .hentry, .page-template-template-blog-full-width-php #content .hentry, .page-template-template-blog-four-col-php #content .hentry').each(function() {
+					$('.page-template-template-full-width-php #content .post, .page-template-template-blog-full-width-php #content .post, .page-template-template-blog-four-col-php #content .post').each(function() {
 						pinboard_restore_elements($(this));
 					});
 				<?php endif; ?>
 			} else {
-				$('#content .hentry').each(function() {
+				$('#content .post').each(function() {
 					pinboard_move_elements($(this));
 				});
 			}
@@ -777,8 +771,10 @@ function pinboard_call_scripts() { ?>
 			var $content = $('.entries');
 			$content.imagesLoaded(function() {
 				$content.masonry({
-					itemSelector : '.hentry, #infscr-loading',
-					columnWidth : container.querySelector('.<?php echo pinboard_teaser_class(); ?>'),
+					itemSelector : '.post',
+					columnWidth : function( containerWidth ) {
+						return containerWidth / 12;
+					},
 				});
 			});
 			<?php if( ( ! is_singular() && ! is_paged() ) || ( ( is_page_template( 'template-blog.php' ) || is_page_template( 'template-blog-full-width.php' ) || is_page_template( 'template-blog-four-col.php' ) || is_page_template( 'template-blog-left-sidebar.php' ) || is_page_template( 'template-blog-no-sidebars.php' ) || is_page_template( 'template-blog-no-sidebars.php' ) || is_page_template( 'template-portfolio.php' ) || is_page_template( 'template-portfolio-right-sidebar.php' ) || is_page_template( 'template-portfolio-four-col.php' ) || is_page_template( 'template-portfolio-left-sidebar.php' ) || is_page_template( 'template-portfolio-no-sidebars.php' ) ) && ! is_paged() ) ) : ?>
@@ -797,34 +793,7 @@ function pinboard_call_scripts() { ?>
 								helper = $(helper);
 								helper.html(data);
 								var content = $('#content .entries', helper);
-								var $entries = $(content.html()).css({ opacity: 0 });
-								$('.entries').append($entries);
-								$content.imagesLoaded(function(){
-									$entries.animate({ opacity: 1 });
-									$content.masonry( 'appended', $entries, true );
-								});
-								if( ($(window).width() > 960) || ($(document).width() > 960) ) {
-									// Viewport is greater than tablet: portrait
-								} else {
-									$('#content .hentry').each(function() {
-										pinboard_move_elements($(this));
-									});
-								}
-								$('audio,video').mediaelementplayer({
-									videoWidth: '100%',
-									videoHeight: '100%',
-									audioWidth: '100%',
-									alwaysShowControls: true,
-									features: ['playpause','progress','tracks','volume'],
-									videoVolume: 'horizontal'
-								});
-								$(".entry-attachment, .entry-content").fitVids({ customSelector: "iframe[src*='wordpress.tv'], iframe[src*='www.dailymotion.com'], iframe[src*='blip.tv'], iframe[src*='www.viddler.com']"});
-								<?php if( pinboard_get_option( 'lightbox' ) ) : ?>
-									$('.entry-content a[href$=".jpg"],.entry-content a[href$=".jpeg"],.entry-content a[href$=".png"],.entry-content a[href$=".gif"],a.colorbox').colorbox({
-										maxWidth: '100%',
-										maxHeight: '100%',
-									});
-								<?php endif; ?>
+								$('.entries').append(content.html());
 								var nav_url = $('#posts-nav .nav-next a', helper).attr('href');
 								if(typeof nav_url !== 'undefined') {
 									nav_link.attr('href', nav_url);
@@ -838,20 +807,14 @@ function pinboard_call_scripts() { ?>
 					}
 				<?php elseif( 'infinite' == pinboard_get_option( 'posts_nav' ) ) : ?>
 					$('#content .entries').infinitescroll({
-						loading: {
-							finishedMsg: "<?php _e( 'There are no more posts to display.', 'pinboard' ); ?>",
-							img: ( window.devicePixelRatio > 1 ? "<?php echo get_template_directory_uri(); ?>/images/ajax-loading_2x.gif" : "<?php echo get_template_directory_uri(); ?>/images/ajax-loading.gif" ),
-							// msg: null,
-							msgText: "<?php _e( 'Loading more posts &#8230;', 'pinboard' ); ?>",
-						},
 						debug           : false,
 						nextSelector    : "#posts-nav .nav-all a, #posts-nav .nav-next a",
-						// loadingImg      : ( window.devicePixelRatio > 1 ? "<?php echo get_template_directory_uri(); ?>/images/ajax-loading_2x.gif" : "<?php echo get_template_directory_uri(); ?>/images/ajax-loading.gif" ),
-						// loadingText     : "Loading more posts &#8230;",
-						// donetext        : "There are no more posts to display.",
+						loadingImg      : ( window.devicePixelRatio > 1 ? "<?php echo get_template_directory_uri(); ?>/images/ajax-loading_2x.gif" : "<?php echo get_template_directory_uri(); ?>/images/ajax-loading.gif" ),
+						loadingText     : "Loading more posts &#8230;",
+						donetext        : "There are no more posts to display.",
 						navSelector     : "#posts-nav",
 						contentSelector : "#content .entries",
-						itemSelector    : "#content .entries .hentry",
+						itemSelector    : "#content .entries .post",
 					}, function(entries){
 						var $entries = $( entries ).css({ opacity: 0 });
 						$entries.imagesLoaded(function(){
@@ -861,7 +824,7 @@ function pinboard_call_scripts() { ?>
 						if( ($(window).width() > 960) || ($(document).width() > 960) ) {
 							// Viewport is greater than tablet: portrait
 						} else {
-							$('#content .hentry').each(function() {
+							$('#content .post').each(function() {
 								pinboard_move_elements($(this));
 							});
 						}
@@ -873,12 +836,9 @@ function pinboard_call_scripts() { ?>
 							features: ['playpause','progress','tracks','volume'],
 							videoVolume: 'horizontal'
 						});
-						$(".entry-attachment, .entry-content").fitVids({ customSelector: "iframe[src*='wordpress.tv'], iframe[src*='www.dailymotion.com'], iframe[src*='blip.tv'], iframe[src*='www.viddler.com']"});
+						$(".entry-attachment, .entry-content").fitVids({ customSelector: "iframe, object, embed"});
 						<?php if( pinboard_get_option( 'lightbox' ) ) : ?>
-							$('.entry-content a[href$=".jpg"],.entry-content a[href$=".jpeg"],.entry-content a[href$=".png"],.entry-content a[href$=".gif"],a.colorbox').colorbox({
-								maxWidth: '100%',
-								maxHeight: '100%',
-							});
+							$('.entry-content a[href$=".jpg"],.entry-content a[href$=".jpeg"],.entry-content a[href$=".png"],.entry-content a[href$=".gif"],a.colorbox').colorbox();
 						<?php endif; ?>
 					});
 				<?php endif; ?>
@@ -892,14 +852,11 @@ function pinboard_call_scripts() { ?>
 			features: ['playpause','progress','tracks','volume'],
 			videoVolume: 'horizontal'
 		});
-		$(".entry-attachment, .entry-content").fitVids({ customSelector: "iframe[src*='wordpress.tv'], iframe[src*='www.dailymotion.com'], iframe[src*='blip.tv'], iframe[src*='www.viddler.com']"});
+		$(".entry-attachment, .entry-content").fitVids({ customSelector: "iframe, object, embed"});
 	});
 	jQuery(window).load(function() {
 		<?php if( pinboard_get_option( 'lightbox' ) ) : ?>
-			jQuery('.entry-content a[href$=".jpg"],.entry-content a[href$=".jpeg"],.entry-content a[href$=".png"],.entry-content a[href$=".gif"],a.colorbox').colorbox({
-				maxWidth: '100%',
-				maxHeight: '100%',
-			});
+			jQuery('.entry-content a[href$=".jpg"],.entry-content a[href$=".jpeg"],.entry-content a[href$=".png"],.entry-content a[href$=".gif"],a.colorbox').colorbox();
 		<?php endif; ?>
 	});
 /* ]]> */
@@ -994,16 +951,15 @@ function pinboard_custom_styles() {
 		}
 	<?php endif; ?>
 	<?php if( $default_options['menu_background'] != pinboard_get_option( 'menu_background' ) ) : ?>
-		#header {
-			border-color: <?php echo esc_attr( pinboard_get_option( 'menu_background' ) ); ?>;
-		}
 		#access {
 			background: <?php echo esc_attr( pinboard_get_option( 'menu_background' ) ); ?>;
 		}
 	<?php endif; ?>
-	<?php if( $default_options['submenu_background'] != pinboard_get_option( 'submenu_background' ) ) : ?>
-		#access li li {
-			background: <?php echo esc_attr( pinboard_get_option( 'submenu_background' ) ); ?>;
+	<?php if( $default_options['menu_item_hover_background'] != pinboard_get_option( 'menu_item_hover_background' ) ) : ?>
+		#access a:hover,
+		#access li.current_page_item > a,
+		#access li.current-menu-item > a {
+			background: <?php echo esc_attr( pinboard_get_option( 'menu_item_hover_background' ) ); ?>;
 		}
 	<?php endif; ?>
 	<?php if( $default_options['sidebar_wide_background'] != pinboard_get_option( 'sidebar_wide_background' ) ) : ?>
@@ -1016,8 +972,7 @@ function pinboard_custom_styles() {
 	<?php if( $default_options['content_background'] != pinboard_get_option( 'content_background' ) ) : ?>
 		.entry,
 		#comments,
-		#respond,
-		#posts-nav {
+		#respond {
 			background: <?php echo esc_attr( pinboard_get_option( 'content_background' ) ); ?>;
 		}
 	<?php endif; ?>
@@ -1235,7 +1190,7 @@ function pinboard_custom_styles() {
 			color:<?php echo esc_attr( pinboard_get_option( 'copyright_links_color' ) ); ?>;
 		}
 	<?php endif; ?>
-	<?php echo pinboard_get_option( 'user_css' ); ?>
+	<?php echo esc_html( pinboard_get_option( 'user_css' ) ); ?>
 </style>
 <?php
 }
@@ -1254,9 +1209,7 @@ if ( ! function_exists( 'pinboard_body_class' ) ) :
 function pinboard_body_class( $classes ) {
 	if( ! is_page_template() ) {
 		$default_options = pinboard_default_options();
-		if( ( 'full-width' == pinboard_get_option( 'layout' ) ) || ( ! is_active_sidebar( 2 ) && ! is_active_sidebar( 3 ) && ! is_active_sidebar( 4 ) && ! is_active_sidebar( 5 ) ) )
-			$classes[] = 'page-template-template-full-width-php';
-		elseif( 'sidebar-content' == pinboard_get_option( 'layout' ) )
+		if( 'sidebar-content' == pinboard_get_option( 'layout' ) )
 			$classes[] = 'page-template-template-sidebar-content-php';
 		elseif( 'sidebar-content-sidebar' == pinboard_get_option( 'layout' ) )
 			$classes[] = 'page-template-template-sidebar-content-sidebar-php';
@@ -1264,8 +1217,10 @@ function pinboard_body_class( $classes ) {
 			$classes[] = 'page-template-template-content-sidebar-half-php';
 		elseif( 'sidebar-content-half' == pinboard_get_option( 'layout' ) )
 			$classes[] = 'page-template-template-sidebar-content-half-php';
-		elseif( 'no-sidebars' == pinboard_get_option( 'layout' ) )
+		elseif( ( 'no-sidebars' == pinboard_get_option( 'layout' ) ) || ( ! is_active_sidebar( 2 ) && ! is_active_sidebar( 3 ) && ! is_active_sidebar( 4 ) && ! is_active_sidebar( 5 ) ) )
 			$classes[] = 'page-template-template-no-sidebars-php';
+		elseif( 'full-width' == pinboard_get_option( 'layout' ) )
+			$classes[] = 'page-template-template-full-width-php';
 	}
 	return $classes;
 }
@@ -1292,13 +1247,11 @@ function pinboard_doc_title( $doc_title ) {
 	} else {
 		if( ! is_home() )
 			$doc_title .= ' &' . $separator . '; ';
-		if( is_home() && ! is_front_page() )
-			$doc_title .= ' &' . $separator . '; ';
 		$doc_title .= get_bloginfo( 'name' );
 		if ( $paged >= 2 || $page >= 2 )
 			$doc_title .=  ', ' . __( 'Page', 'pinboard' ) . ' ' . max( $paged, $page );
 	}
-	if ( is_home() && is_front_page() && $site_description )
+	if ( ( is_home() ) && $site_description )
 		$doc_title .= ' &' . $separator . '; ' . $site_description;
 	return $doc_title;
 }
@@ -1388,7 +1341,7 @@ if ( ! function_exists( 'pinboard_content_class' ) ) :
  */
 function pinboard_content_class( $classes = array() ) {
 	$classes[] = 'column';
-	if( is_category( pinboard_get_option( 'portfolio_cat' ) ) || ( is_category() && cat_is_ancestor_of( pinboard_get_option( 'portfolio_cat' ), get_queried_object() ) || 'full-width' == pinboard_get_option( 'layout' ) || 'no-sidebars' == pinboard_get_option( 'layout' ) ) || ( ! is_active_sidebar( 2 ) && ! is_active_sidebar( 3 ) && ! is_active_sidebar( 4 ) && ! is_active_sidebar( 5 ) )  )
+	if( is_category( pinboard_get_option( 'portfolio_cat' ) ) || ( is_category() && cat_is_ancestor_of( pinboard_get_option( 'portfolio_cat' ), get_queried_object() ) || 'full-width' == pinboard_get_option( 'layout' ) || 'no-sidebars' == pinboard_get_option( 'layout' ) ) )
 		$classes[] = 'onecol';
 	elseif( 'content-sidebar-half' == pinboard_get_option( 'layout' ) || 'sidebar-content-half' == pinboard_get_option( 'layout' ) )
 		$classes[] = 'twocol';
@@ -1432,54 +1385,6 @@ function pinboard_category_filter( $cat = null ) {
 }
 endif;
 
-if ( ! function_exists( 'pinboard_teaser_class' ) ) :
-/**
- * Add class has-thumbnail to posts that have a thumbnail set
- *
- * @since Pinboard 1.1.2
- */
-function pinboard_teaser_class() {
-	$class = 'onecol';
-	global $pinboard_page_template;
-	if( is_page() && ! isset( $pinboard_page_template ) )
-		$pinboard_page_template = basename( get_page_template() );
-	if( isset( $pinboard_page_template ) ) {
-		if( 'template-blog.php' == $pinboard_page_template || 'template-portfolio-right-sidebar.php' == $pinboard_page_template )
-			$class = 'twocol';
-		elseif( 'template-blog-full-width.php' == $pinboard_page_template || 'template-portfolio.php' == $pinboard_page_template )
-			$class = 'threecol';
-		elseif( 'template-blog-four-col.php' == $pinboard_page_template || 'template-portfolio-four-col.php' == $pinboard_page_template )
-			$class = 'fourcol';
-		elseif( 'template-blog-left-sidebar.php' == $pinboard_page_template || 'template-portfolio-left-sidebar.php' == $pinboard_page_template )
-			$class = 'twocol';
-		elseif( 'template-blog-no-sidebars.php' == $pinboard_page_template || 'template-portfolio-no-sidebars.php' == $pinboard_page_template )
-			$class = 'twocol';
-	} elseif( is_category( pinboard_get_option( 'portfolio_cat' ) ) || ( is_category() && cat_is_ancestor_of( pinboard_get_option( 'portfolio_cat' ), get_queried_object() ) ) ) {
-		if( 2 == pinboard_get_option( 'portfolio_columns' ) )
-			$class = 'twocol';
-		elseif( 3 == pinboard_get_option( 'portfolio_columns' ) )
-			$class = 'threecol';
-		elseif( 4 == pinboard_get_option( 'portfolio_columns' ) )
-			$class = 'fourcol';
-	} elseif( 'full-width' == pinboard_get_option( 'layout' ) || 'no-sidebars' == pinboard_get_option( 'layout' ) ) {
-		if( 2 == pinboard_get_option( 'layout_columns' ) )
-			$class = 'twocol';
-		elseif( 3 == pinboard_get_option( 'layout_columns' ) )
-			$class = 'threecol';
-		elseif( 4 == pinboard_get_option( 'layout_columns' ) )
-			$class = ( 'no-sidebars' == pinboard_get_option( 'layout' ) ? 'threecol' : 'fourcol' );
-	} else {
-		if( 2 == pinboard_get_option( 'layout_columns' ) )
-			$class = 'onecol';
-		elseif( 3 == pinboard_get_option( 'layout_columns' ) )
-			$class = 'twocol';
-		elseif( 4 == pinboard_get_option( 'layout_columns' ) )
-			$class = 'threecol';
-	}
-	return $class;
-}
-endif;
-
 if ( ! function_exists( 'pinboard_post_class' ) ) :
 /**
  * Add class has-thumbnail to posts that have a thumbnail set
@@ -1493,7 +1398,40 @@ function pinboard_post_class( $classes, $class, $post_id ) {
 	$pinboard_count++;
 	$classes[] = 'column';
 	if( pinboard_is_teaser() ) {
-		$classes[] = pinboard_teaser_class();
+		global $pinboard_page_template;
+		if( isset( $pinboard_page_template ) ) {
+			if( 'template-blog.php' == $pinboard_page_template || 'template-portfolio-right-sidebar.php' == $pinboard_page_template )
+				$classes[] = 'twocol';
+			elseif( 'template-blog-full-width.php' == $pinboard_page_template || 'template-portfolio.php' == $pinboard_page_template )
+				$classes[] = 'threecol';
+			elseif( 'template-blog-four-col.php' == $pinboard_page_template || 'template-portfolio-four-col.php' == $pinboard_page_template )
+				$classes[] = 'fourcol';
+			elseif( 'template-blog-left-sidebar.php' == $pinboard_page_template || 'template-portfolio-left-sidebar.php' == $pinboard_page_template )
+				$classes[] = 'twocol';
+			elseif( 'template-blog-no-sidebars.php' == $pinboard_page_template || 'template-portfolio-no-sidebars.php' == $pinboard_page_template )
+				$classes[] = 'twocol';
+		} elseif( is_category( pinboard_get_option( 'portfolio_cat' ) ) || ( is_category() && cat_is_ancestor_of( pinboard_get_option( 'portfolio_cat' ), get_queried_object() ) ) ) {
+			if( 2 == pinboard_get_option( 'portfolio_columns' ) )
+				$classes[] = 'twocol';
+			elseif( 3 == pinboard_get_option( 'portfolio_columns' ) )
+				$classes[] = 'threecol';
+			elseif( 4 == pinboard_get_option( 'portfolio_columns' ) )
+				$classes[] = 'fourcol';
+		} elseif( 'full-width' == pinboard_get_option( 'layout' ) || 'no-sidebars' == pinboard_get_option( 'layout' ) ) {
+			if( 2 == pinboard_get_option( 'layout_columns' ) )
+				$classes[] = 'twocol';
+			elseif( 3 == pinboard_get_option( 'layout_columns' ) )
+				$classes[] = 'threecol';
+			elseif( 4 == pinboard_get_option( 'layout_columns' ) )
+				$classes[] = ( 'no-sidebars' == pinboard_get_option( 'layout' ) ? 'threecol' : 'fourcol' );
+		} else {
+			if( 2 == pinboard_get_option( 'layout_columns' ) )
+				$classes[] = 'onecol';
+			elseif( 3 == pinboard_get_option( 'layout_columns' ) )
+				$classes[] = 'twocol';
+			elseif( 4 == pinboard_get_option( 'layout_columns' ) )
+				$classes[] = 'threecol';
+		}
 	} else {
 		$classes[] = 'onecol';
 	}
@@ -1701,9 +1639,6 @@ if ( ! function_exists( 'pinboard_gallery_shortcode' ) ) :
  * @return string HTML content to display gallery.
  */
 function pinboard_gallery_shortcode( $output, $attr ) {
-	// Allow use of Jetpack Tiled Galleries Module
-	if( class_exists( 'Jetpack' ) && in_array( 'tiled-gallery', Jetpack::get_active_modules() ) )
-		return $output;
 	global $post, $wp_locale;
 	static $instance = 0;
 	$instance++;
@@ -2316,35 +2251,30 @@ if ( ! function_exists( 'pinboard_404' ) ) :
  * @since Pinboard 1.0
  */
 function pinboard_404() { ?>
-	<div class="entry">
-		<article class="post hentry column onecol" id="post-0">
-			<h2 class="entry-title"><?php _e( 'Content not found', 'pinboard' ) ?></h2>
-			<div class="entry-content">
-				<?php _e( 'The content you are looking for could not be found.', 'pinboard' ); ?></p>
-				<?php if( is_active_sidebar( 7 ) ) : ?>
-					<?php _e( 'Use the information below or try to seach to find what you\'re looking for:', 'pinboard' ); ?></p>
-				<?php endif; ?>
-				<?php dynamic_sidebar( 7 ); ?>
-			</div><!-- .entry-content -->
-		</article><!-- .post -->
-		<div class="clear"></div>
-	</div><!-- .entry -->
+	<article class="post hentry column onecol" id="post-0">
+		<h2 class="entry-title"><?php _e( 'Content not found', 'pinboard' ) ?></h2>
+		<div class="entry-content">
+			<?php _e( 'The content you are looking for could not be found.', 'pinboard' ); ?></p>
+			<?php if( is_active_sidebar( 7 ) ) : ?>
+				<?php _e( 'Use the information below or try to seach to find what you\'re looking for:', 'pinboard' ); ?></p>
+			<?php endif; ?>
+			<?php dynamic_sidebar( 7 ); ?>
+		</div><!-- .entry-content -->
+	</article><!-- .post -->
+	<div class="clear"></div>
 <?php
 }
 endif;
 
 if ( ! function_exists( 'pinboard_sidebar_class' ) ) :
 /**
- * Outputs the class attribute for the Sidebar
+ * Outputs the class attribute for the content wrapper
  *
  * @since Pinboard 1.0
  */
 function pinboard_sidebar_class( $classes = array() ) {
-	global $pinboard_page_template;
 	$classes[] = 'column';
-	if( isset( $pinboard_page_template ) && ( 'template-blog.php' == $pinboard_page_template || 'template-blog-left-sidebar.php' == $pinboard_page_template || 'template-content-sidebar.php' == $pinboard_page_template || 'template-sidebar-content.php' == $pinboard_page_template ) )
-		$classes[] = 'threecol';
-	elseif( 'content-sidebar-half' == pinboard_get_option( 'layout' ) || 'sidebar-content-half' == pinboard_get_option( 'layout' ) || 'content-sidebar-half' == pinboard_get_option( 'layout' ) || is_page_template( 'template-content-sidebar-half.php' ) || is_page_template( 'template-sidebar-content-half.php' ) )
+	if( 'content-sidebar-half' == pinboard_get_option( 'layout' ) || 'sidebar-content-half' == pinboard_get_option( 'layout' ) || 'content-sidebar-half' == pinboard_get_option( 'layout' ) || is_page_template( 'template-content-sidebar-half.php' ) || is_page_template( 'template-sidebar-content-half.php' ) )
 		$classes[] = 'twocol';
 	else {
 		if( 2 == pinboard_get_option( 'layout_columns' ) || is_page_template( 'template-content-sidebar.php' ) )
@@ -2370,4 +2300,20 @@ function pinboard_copyright_notice() {
 	$copyright = str_replace( '%blogname%', get_bloginfo( 'name' ), $copyright );
 	echo esc_html( $copyright );
 }
+
+
+//Pages Tags & Category Meta boxes
+function add_pages_meta_boxes() {
+add_meta_box( 'tagsdiv-post_tag', __('Page Tags'), 'post_tags_meta_box', 'page', 'side', 'low');
+add_meta_box( 'categorydiv', __('Categories'), 'post_categories_meta_box', 'page', 'normal', 'core');
+}
+add_action('add_meta_boxes', 'add_pages_meta_boxes');
+
+add_action('init','attach_category_to_page');
+function attach_category_to_page() {
+register_taxonomy_for_object_type('category','page');
+}
+//end
+
+
 endif;
