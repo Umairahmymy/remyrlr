@@ -8,7 +8,7 @@
 <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
 <?php wp_head(); ?>
 </head>
-<link rel="shortcut icon" href="http://www.umairah.tk/wp-content/uploads/2013/02/favicon.png">
+
 <body <?php body_class() ?>>
 	<div id="wrapper">
 		<header id="header">
@@ -31,5 +31,4 @@
 				<?php wp_nav_menu( array( 'theme_location' => 'primary_nav' ) ); ?>
 				<div class="clear"></div>
 			</nav><!-- #access -->
-		<img src = "http://www.umairah.tk/wp-content/uploads/2013/02/url.jpg"/> 
 		</header><!-- #header -->
